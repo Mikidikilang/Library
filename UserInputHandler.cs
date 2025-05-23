@@ -9,42 +9,92 @@ namespace Library
 {
     class UserInputHandler
     {
-        public static int UserChoice()
+        public static int UserChoice(int minValue, int maxValue)
         {
-            while(true)
+            while (true)
             {
-                string inputStr = Console.ReadLine();
-                int input;
-                if (int.TryParse(inputStr, out input))
+                Console.Write($"Kérjük adjon meg egy számot {minValue} és {maxValue} között: ");
+                string? inputStr = Console.ReadLine();
+
+                if (int.TryParse(inputStr, out int input) && input >= minValue && input <= maxValue)
                 {
                     return input;
                 }
+
+                Console.WriteLine($"Érvénytelen bemenet. Kérjük adjon meg egy számot {minValue} és {maxValue} között.");
             }
         }
+
+        /// <summary>
+        /// Bekéri egy könyv adatait a felhaszbálótól és létrehoz egy Book objektumot
+        /// </summary>
+        /// <returns>A felhasználó által megadott adatokkal létrehozott Book objektum.</returns>
         public static Book GetBookFromUser()
         {
-            Console.WriteLine("Cím: ");
-            string title = Console.ReadLine();
-            Console.WriteLine("Szerző: ");
-            string author = Console.ReadLine();
-            Console.WriteLine("ISBN: ");
-            string isbn = Console.ReadLine();
-            Book book = new Book(title, author, isbn);
-            return book;
+            string title = GetNonEmptyInput("Cím: ");
+            string author = GetNonEmptyInput("Szerző: ");
+            string isbn = GetNonEmptyInput("ISBN: ");
+            int numberOfCopies = GetPositiveIntegerInput("Példányszám: ");
+
+            return new Book(title, author, isbn, numberOfCopies);
         }
 
+        /// <summary>
+        /// Bekéri a köönyv ISBN számát a felhasználótól.
+        /// </summary>
+        /// <returns>A felhasználó által megadott ISBN szám</returns>
         public static string GetIsbn()
         {
-            Console.WriteLine("ISBN: ");
-            string isbn = Console.ReadLine();
-            return isbn;
+            return GetNonEmptyInput("ISBN: ");
         }
 
+        /// <summary>
+        /// Bekéri a keresési kifejezést (szerző vagy cím) a felhasználótól.
+        /// </summary>
+        /// <returns>A felhasználó által megadott keresési kifejezés.</returns>
         public static string GetAuthorOrTitle()
         {
-            Console.WriteLine("Kérlek adj meg egy szerzőt vagy címet: ");
-            string search_object = Console.ReadLine();
-            return search_object;
+            return GetNonEmptyInput("Kérlek adj meg egy szerzőt vagy címet: ");
+        }
+
+        /// <summary>
+        /// Segéd metódus, ami biztosítja, hogy a felhasználó ne adjon meg üres vagy csak szóközt tartalmazó inputot.
+        /// </summary>
+        /// <param name="prompt">A felhasználónak megjelenő üzenet.</param>
+        /// <returns>A felhasználó által megadott, nem üres és trimelt string.</returns>
+        private static string GetNonEmptyInput(string prompt)
+        {
+            while (true)
+            {
+                Console.Write(prompt);
+                string? input = Console.ReadLine();
+
+                if (!string.IsNullOrWhiteSpace(input))
+                {
+                    return input.Trim();
+                }
+
+                Console.WriteLine("Ez a mező nem lehet üres! Próbálja újra.");
+            }
+        }
+
+        /// <summary>
+        /// Segéd metódus, ami pozitív egész számot kér be a felhasználótól.
+        /// </summary>
+        /// <param name="prompt">A felhasználónak megjelenő üzenet.</param>
+        /// <returns>A felhasználó által megadott pozitív egész szám.</returns>
+        private static int GetPositiveIntegerInput(string prompt)
+        {
+            while (true)
+            {
+                Console.Write(prompt);
+                string? inputStr = Console.ReadLine();
+                if (int.TryParse(inputStr, out int input) && input >= 0) // Lehetővé tesszük a 0-t is, ha a példányszám 0 lehet
+                {
+                    return input;
+                }
+                Console.WriteLine("Kérjük adjon meg egy érvényes, nem negatív egész számot: ");
+            }
         }
 
     }

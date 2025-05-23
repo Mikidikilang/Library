@@ -1,45 +1,46 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel.DataAnnotations;
+using System.Diagnostics.CodeAnalysis;
 
 namespace Library
 {
     class Book
     {
-        //Field->Mezők
-        private readonly string _title;
-        private readonly string _author;
-        private readonly string _isbn;  //egyedi azonosító
-        private bool _isAvailable;
+        [Key]
+        [Required]
+        [MaxLength(20)]
+        public string Isbn { get; set; } = string.Empty;
 
+        [Required]
+        [MaxLength(200)]
+        public string Title { get; set; } = string.Empty;
+
+        [Required]
+        [MaxLength(100)]
+        public string Author { get; set; } = string.Empty;
+
+        [Required]
+        [Range(0, int.MaxValue)]
+        public int NumberOfCopies { get; set; } = 1;
+
+        public bool IsAvailable { get; set; } = true;
 
         //Konstruktor
-        public Book(string title, string author, string isbn)
+        public Book(string title, string author, string isbn, int numberOfCopies)
         {
-            _title = title;
-            _author = author;
-            _isbn = isbn;
-            _isAvailable = true;
+            Title = title;
+            Author = author;
+            Isbn = isbn;
+            NumberOfCopies = numberOfCopies;
+            IsAvailable = true;
         }
 
-        //getterek
-        public string Title => _title;
-        public string Author => _author;
-        public string Isbn => _isbn;
-        public bool IsAvailable
-        {
-            get => _isAvailable;
-            set => _isAvailable = !_isAvailable;
-        } 
-        private string AvailableStatus => IsAvailable ? "Available" : "Not avaiable";
+        private string AvailableStatus => IsAvailable ? "Avaiable" : "Not avaiable";
 
 
 
         public string GetDetails()
         {
-            return $"{($"Title: {Title}"), -25}{($"Author: {Author}"), -25}{($"ISBN: {Isbn}"), -25}{($"Status: {AvailableStatus}"), -25}";
+            return $"{"Title: " + Title,-25}{"Author: " + Author,-25}{"ISBN: " + Isbn,-25}{"Copies: " + NumberOfCopies,-10}{"Status: " + AvailableStatus,-25}";
         }
     }
 }

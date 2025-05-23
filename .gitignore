@@ -361,3 +361,49 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+## Operating System Files
+# macOS
+.DS_Store
+._*
+.AppleDouble
+.LSOverride
+
+# Windows thumbnail cache
+Thumbs.db
+ehthumbs.db
+
+## Visual Studio Code
+# Covers workspace settings, history, etc.
+# Consider un-ignoring (!.vscode/launch.json) or committing specific files
+# like launch.json or tasks.json if they are team-wide configurations.
+.vscode/
+
+## JetBrains Rider
+# Covers project specific settings.
+# Some files within .idea (like code style or shared run configurations)
+# can be versioned. Refer to JetBrains documentation for specifics.
+# For a simple approach, ignore the whole directory:
+.idea/
+
+## Environment variables
+.env
+.env.*
+!.env.example
+!.env.template
+
+## Node.js debug logs (if Node.js is used for build tools, etc.)
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+## Azure Functions local settings
+# Contains local connection strings and app settings for Azure Functions
+local.settings.json
+
+## Additional common sensitive files
+secrets.json
+secrets.yaml
+secrets.yml
+*.secret
+credentials.*
