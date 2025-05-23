@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Threading; 
+using System.Threading;
 
 namespace Library
 {
@@ -9,7 +9,6 @@ namespace Library
     public class MenuHandler
     {
         private readonly Library _library;
-
 
         /// <summary>
         /// Konstruktor a MenuHandler osztályhoz.
@@ -52,7 +51,7 @@ namespace Library
                         case 6:
                             Console.WriteLine("Viszlát!");
                             Thread.Sleep(Constants.UserFeedbackDelayMilliseconds);
-                            return; 
+                            return;
                         default:
                             Console.WriteLine("Érvénytelen választás. Kérjük, próbálja újra.");
                             Thread.Sleep(Constants.UserFeedbackDelayMilliseconds);
@@ -67,7 +66,7 @@ namespace Library
         /// </summary>
         private void DisplayMenu()
         {
-            Console.Clear(); // Törli a konzol tartalmát a menü megjelenítése előtt
+            Console.Clear();
             Console.WriteLine("------------------------------------------");
             Console.WriteLine("             KÖNYVTÁR KEZELŐ              ");
             Console.WriteLine("------------------------------------------");
@@ -78,13 +77,9 @@ namespace Library
             Console.WriteLine("5. Könyv keresése");
             Console.WriteLine("6. Kilépés");
             Console.WriteLine("------------------------------------------");
-            Console.Write("Válasszon egy opciót: "); // Kiegészített prompt
+            Console.Write("Válasszon egy opciót: ");
         }
 
-        /// <summary>
-        /// Törli a konzolt és megjeleníti a megadott fejlécet.
-        /// </summary>
-        /// <param name="header">A megjelenítendő fejléc szövege.</param>
         private void ClearConsoleAndDisplayHeader(string header)
         {
             Console.Clear();
@@ -93,67 +88,68 @@ namespace Library
             Console.WriteLine("------------------------------------------");
         }
 
-        /// <summary>
-        /// Megállítja a program futását, amíg a felhasználó meg nem nyom egy gombot.
-        /// </summary>
         private void PauseForUserInput()
         {
             Console.WriteLine("\nNyomjon meg egy gombot a folytatáshoz...");
             Console.ReadKey();
         }
 
-        /// <summary>
-        /// Bekéri a könyv adatait a felhasználótól és hozzáadja a könyvtárhoz.
-        /// </summary>
         private void AddBook()
         {
             ClearConsoleAndDisplayHeader("Könyv hozzáadása");
             Book newBook = UserInputHandler.GetBookFromUser();
-            _library.AddBook(newBook);
-            PauseForUserInput(); // Vár a felhasználóra a művelet után
+            var result = _library.AddBook(newBook);
+            Console.WriteLine(result.Message);
+            PauseForUserInput();
         }
 
-        /// <summary>
-        /// Bekéri a kölcsönözni kívánt könyv ISBN számát és kölcsönzi azt.
-        /// </summary>
         private void LendBook()
         {
             ClearConsoleAndDisplayHeader("Könyv kölcsönzése");
             string isbn = UserInputHandler.GetIsbn();
-            _library.LendBook(isbn);
-            PauseForUserInput(); // Vár a felhasználóra a művelet után
+            var result = _library.LendBook(isbn);
+            Console.WriteLine(result.Message);
+            PauseForUserInput();
         }
 
-        /// <summary>
-        /// Bekéri a visszahozni kívánt könyv ISBN számát és visszahozza azt.
-        /// </summary>
         private void ReturnBook()
         {
             ClearConsoleAndDisplayHeader("Könyv visszahozatala");
             string isbn = UserInputHandler.GetIsbn();
-            _library.ReturnBook(isbn);
-            PauseForUserInput(); // Vár a felhasználóra a művelet után
+            var result = _library.ReturnBook(isbn);
+            Console.WriteLine(result.Message);
+            PauseForUserInput();
         }
 
-        /// <summary>
-        /// Listázza az összes könyvet a könyvtárban.
-        /// </summary>
         private void ListAllBooks()
         {
             ClearConsoleAndDisplayHeader("Összes könyv listázása");
-            _library.ListAllBooks();
-            PauseForUserInput(); // Vár a felhasználóra a művelet után
+            var (success, message, books) = _library.ListAllBooks();
+            Console.WriteLine(message);
+            if (success && books.Any())
+            {
+                foreach (var book in books)
+                {
+                    Console.WriteLine(book.GetDetails());
+                }
+            }
+            PauseForUserInput();
         }
 
-        /// <summary>
-        /// Bekéri a keresési kifejezést és megkeresi a megfelelő könyveket.
-        /// </summary>
         private void SearchBook()
         {
             ClearConsoleAndDisplayHeader("Könyv keresése");
             string searchItem = UserInputHandler.GetAuthorOrTitle();
-            _library.SearchBook(searchItem);
-            PauseForUserInput(); // Vár a felhasználóra a művelet után
+            var (success, message, books) = _library.SearchBook(searchItem);
+            Console.WriteLine(message);
+            if (success && books.Any())
+            {
+                foreach (var book in books)
+                {
+                    Console.WriteLine(book.GetDetails());
+                }
+            }
+            PauseForUserInput();
         }
     }
 }

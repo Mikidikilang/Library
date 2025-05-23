@@ -3,7 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Library
 {
-    class Book
+    public class Book
     {
         [Key]
         [Required]
@@ -31,7 +31,7 @@ namespace Library
             Author = author;
             Isbn = isbn;
             NumberOfCopies = numberOfCopies;
-            IsAvailable = true;
+            IsAvailable = numberOfCopies > 0;
         }
 
         private string AvailableStatus => IsAvailable ? "Avaiable" : "Not avaiable";

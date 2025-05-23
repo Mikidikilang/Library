@@ -7,9 +7,9 @@ using System.Threading.Tasks;
 
 namespace Library
 {
-    internal class LibraryContext : DbContext
+    public class LibraryContext : DbContext
     {
-        public DbSet<Book> Books { get; set; }
+        public DbSet<Book> Books { get; set; } = null!;
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

@@ -1,163 +1,179 @@
-﻿using Microsoft.EntityFrameworkCore;
-using System;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
-using System.Security.Cryptography.X509Certificates;
-using System.Threading;
 
 namespace Library
 {
+    /// <summary>
+    /// A Library osztály csak üzleti logikát tartalmaz, nem végez közvetlen felhasználói interakciót.
+    /// Minden művelet eredményét OperationResult vagy adatszerkezet formájában adja vissza.
+    /// </summary>
+    public class OperationResult
+    {
+        public bool Success { get; }
+        public string Message { get; }
+        public OperationResult(bool success, string message)
+        {
+            Success = success;
+            Message = message;
+        }
+    }
+
     class Library : IDisposable
     {
-        private readonly LibraryContext _context;
+        private readonly BookRepository _bookRepository;
 
+        #region Konstruktorok
         public Library()
         {
-            _context = new LibraryContext();
-            _context.Database.EnsureCreated();
+            _bookRepository = new BookRepository();
         }
+        #endregion
 
-        //metódusok
+        #region Könyv műveletek
 
-        public void AddBook(Book book)
+        public OperationResult AddBook(Book book)
         {
             try
             {
-                var existingBook = _context.Books.FirstOrDefault(b => b.Isbn == book.Isbn);
-
-                if(existingBook != null)
+                bool isNew = _bookRepository.AddBook(book);
+                if (isNew)
                 {
-                    existingBook.NumberOfCopies += book.NumberOfCopies;
-                    Console.WriteLine($"Ez az ISBN már létezik. Példányszám növelve: {existingBook.NumberOfCopies}");
-                    _context.Books.Update(existingBook);
+                    return new OperationResult(true, "Sikeresen hozzáadtuk a könyvet!");
                 }
                 else
                 {
-                    _context.Books.Add(book);
-                    Console.WriteLine("Sikeresen hozzá adtuk a könyvet!");
+                    var existingBook = _bookRepository.GetBookByIsbn(book.Isbn);
+                    return new OperationResult(true, $"Ez az ISBN már létezik. Példányszám növelve: {existingBook?.NumberOfCopies}");
                 }
-                _context.SaveChanges();
-            } catch (Exception ex)
-            {
-                Console.WriteLine($"Hiba történt a könyv hozzáadásakor: {ex.Message}");
             }
-            Thread.Sleep(Constants.UserFeedbackDelayMilliseconds);
+            catch (Exception ex)
+            {
+                return new OperationResult(false, $"Hiba történt a könyv hozzáadásakor: {ex.Message}");
+            }
         }
 
-        public void AddBook(string title, string author, string isbn, int numberOfCopies)
+        public OperationResult AddBook(string title, string author, string isbn, int numberOfCopies)
         {
             var book = new Book(title, author, isbn, numberOfCopies);
-            AddBook(book);
+            return AddBook(book);
         }
 
-        public void LendBook(string isbn)
+        public OperationResult LendBook(string isbn)
         {
             try
             {
-                var book = FindBookByIsbn(isbn);
+                var book = _bookRepository.GetBookByIsbn(isbn);
                 if (book == null)
                 {
-                    Console.WriteLine("Sajnos a könyv nem található!");
-                } else if (book.NumberOfCopies <= 0) {
-                    Console.WriteLine("Sajnos a könvyből nincs bent szabad példány!");
-                } else
-                {
-                    book.NumberOfCopies--;
-                    if (book.NumberOfCopies == 0)
-                    {
-                        book.IsAvailable = false;
-                    }
-                    _context.Books.Update(book);
-                    _context.SaveChanges();
-                    Console.WriteLine($"Sikeres kölcsönzés! Maradt példány: {book.NumberOfCopies}");
+                    return new OperationResult(false, "Sajnos a könyv nem található!");
                 }
-            } catch (Exception ex)
-            {
-                Console.WriteLine($"Hiba történt a kölcsönzés során: {ex.Message}");
-            }
-            Thread.Sleep(Constants.UserFeedbackDelayMilliseconds);
-        }
-
-        public void ReturnBook(string isbn)
-        {
-            try
-            {
-                var book = FindBookByIsbn(isbn);
-                if (book == null)
+                else if (book.NumberOfCopies <= 0)
                 {
-                    Console.WriteLine("Sajnos a könyv nem található!");
-                } else
-                {
-                    book.NumberOfCopies++;
-                    if (book.NumberOfCopies > 0)
-                    {
-                        book.IsAvailable = true;
-                    }
-                    _context.Books.Update(book);
-                    _context.SaveChanges();
-                    Console.WriteLine($"Sikeres visszahozatal! Jelenlegi példányszám: {book.NumberOfCopies}");
+                    return new OperationResult(false, "Sajnos a könyvből nincs bent szabad példány!");
                 }
-            } catch (Exception ex)
-            {
-                Console.WriteLine($"Hiba történt a  visszahozás során: {ex.Message}");
-            }
-            Thread.Sleep(Constants.UserFeedbackDelayMilliseconds);
-        }
-        public void ListAllBooks()
-        {
-            try
-            {
-                var books = _context.Books.ToList();
-                if(!books.Any())
+                else
                 {
-                    Console.WriteLine("Nincsenek könyvek az adatbázisban.");
-                } else
-                {
-                    Console.WriteLine("A könyvek tartalma:");
-                    Console.WriteLine();
-                    foreach(var book in books)
+                    bool success = _bookRepository.DecrementBookCopy(book);
+                    if (success)
                     {
-                        Console.WriteLine(book.GetDetails());
+                        return new OperationResult(true, $"Sikeres kölcsönzés! Maradt példány: {book.NumberOfCopies}");
                     }
-                }
-            } catch (Exception ex)
-            {
-                Console.WriteLine($"Hiba történt a könyvek listázásakor: {ex.Message}");
-            }
-            Thread.Sleep(Constants.UserFeedbackDelayMilliseconds);
-        }
-        public void SearchBook(string searchItem)
-        {
-            try
-            {
-                var matches = _context.Books
-                    .Where(book => book.Title.Contains(searchItem) || book.Author.Contains(searchItem))
-                    .ToList();
-                if (!matches.Any())
-                {
-                    Console.WriteLine($"Nincs sajnos egyezés ezzel: {searchItem}");
-                } else
-                {
-                    Console.WriteLine($"Találatok erre: {searchItem}");
-                    Console.WriteLine();
-                    foreach (var book in matches)
+                    else
                     {
-                        Console.WriteLine(book.GetDetails());
+                        return new OperationResult(false, "Hiba történt a példányszám csökkentésekor.");
                     }
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Hiba történt a keresés során: {ex.Message}");
+                return new OperationResult(false, $"Hiba történt a kölcsönzés során: {ex.Message}");
             }
-            Thread.Sleep(Constants.UserFeedbackDelayMilliseconds);
         }
 
-        //segéd függvények
-        private Book? FindBookByIsbn(string isbn) => _context.Books.FirstOrDefault(book => book.Isbn == isbn);
+        public OperationResult ReturnBook(string isbn)
+        {
+            try
+            {
+                var book = _bookRepository.GetBookByIsbn(isbn);
+                if (book == null)
+                {
+                    return new OperationResult(false, "Sajnos a könyv nem található!");
+                }
+                else
+                {
+                    bool success = _bookRepository.IncrementBookCopy(book);
+                    if (success)
+                    {
+                        return new OperationResult(true, $"Sikeres visszavétel! Jelenlegi példányszám: {book.NumberOfCopies}");
+                    }
+                    else
+                    {
+                        return new OperationResult(false, "Hiba történt a példányszám növelésekor.");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                return new OperationResult(false, $"Hiba történt a visszavétel során: {ex.Message}");
+            }
+        }
+
+        #endregion
+
+        #region Listázás és keresés
+
+        public (bool Success, string Message, List<Book> Books) ListAllBooks()
+        {
+            try
+            {
+                var books = _bookRepository.GetAllBooks().ToList();
+                if (!books.Any())
+                {
+                    return (true, "Nincsenek könyvek az adatbázisban.", new List<Book>());
+                }
+                else
+                {
+                    return (true, "A könyvek listája:", books);
+                }
+            }
+            catch (Exception ex)
+            {
+                return (false, $"Hiba történt a könyvek listázásakor: {ex.Message}", new List<Book>());
+            }
+        }
+
+        public (bool Success, string Message, List<Book> Books) SearchBook(string searchItem)
+        {
+            try
+            {
+                var matches = _bookRepository.SearchBooks(searchItem).ToList();
+                if (!matches.Any())
+                {
+                    return (true, $"Nincs sajnos egyezés ezzel: {searchItem}", new List<Book>());
+                }
+                else
+                {
+                    return (true, $"Találatok erre: {searchItem}", matches);
+                }
+            }
+            catch (Exception ex)
+            {
+                return (false, $"Hiba történt a keresés során: {ex.Message}", new List<Book>());
+            }
+        }
+
+        #endregion
+
+        #region Segédfüggvények és IDisposable
+
+        private Book? FindBookByIsbn(string isbn) => _bookRepository.GetBookByIsbn(isbn);
 
         public void Dispose()
         {
-            _context?.Dispose();
+            _bookRepository?.Dispose();
         }
+
+        #endregion
     }
 }

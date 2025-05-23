@@ -26,7 +26,7 @@ namespace Library
         }
 
         /// <summary>
-        /// Bekéri egy könyv adatait a felhaszbálótól és létrehoz egy Book objektumot
+        /// Bekéri egy könyv adatait a felhasználótól és létrehoz egy Book objektumot
         /// </summary>
         /// <returns>A felhasználó által megadott adatokkal létrehozott Book objektum.</returns>
         public static Book GetBookFromUser()
@@ -40,7 +40,7 @@ namespace Library
         }
 
         /// <summary>
-        /// Bekéri a köönyv ISBN számát a felhasználótól.
+        /// Bekéri a könyv ISBN számát a felhasználótól.
         /// </summary>
         /// <returns>A felhasználó által megadott ISBN szám</returns>
         public static string GetIsbn()
@@ -89,7 +89,7 @@ namespace Library
             {
                 Console.Write(prompt);
                 string? inputStr = Console.ReadLine();
-                if (int.TryParse(inputStr, out int input) && input >= 0) // Lehetővé tesszük a 0-t is, ha a példányszám 0 lehet
+                if (int.TryParse(inputStr, out int input) && input >= 0)
                 {
                     return input;
                 }
