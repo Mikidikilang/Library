@@ -11,6 +11,8 @@ namespace Library
     /// </summary>
     public interface IBookRepository : IDisposable
     {
+        #region Async CRUD Operations
+
         /// <summary>
         /// Hozzáad egy új könyvet az adatbázishoz, vagy növeli a meglévő könyv példányszámát.
         /// </summary>
@@ -19,20 +21,6 @@ namespace Library
         /// <exception cref="ArgumentNullException">Ha a book paraméter null</exception>
         /// <exception cref="InvalidOperationException">Adatbázis hiba esetén</exception>
         Task<bool> AddBookAsync(Book book);
-
-        /// <summary>
-        /// Megkeresi a könyvet ISBN alapján.
-        /// </summary>
-        /// <param name="isbn">A keresett könyv ISBN száma</param>
-        /// <returns>A megtalált könyv objektum, vagy null ha nem található</returns>
-        /// <exception cref="ArgumentException">Ha az ISBN üres vagy null</exception>
-        Task<Book?> GetBookByIsbnAsync(string isbn);
-
-        /// <summary>
-        /// Visszaadja az összes könyvet az adatbázisból.
-        /// </summary>
-        /// <returns>Az összes könyv listája</returns>
-        Task<IEnumerable<Book>> GetAllBooksAsync();
 
         /// <summary>
         /// Frissíti egy meglévő könyv adatait az adatbázisban.
@@ -50,6 +38,24 @@ namespace Library
         /// <returns>True, ha a törlés sikeres volt</returns>
         /// <exception cref="ArgumentException">Ha az ISBN üres vagy null</exception>
         Task<bool> DeleteBookAsync(string isbn);
+
+        #endregion
+
+        #region Async Query Operations
+
+        /// <summary>
+        /// Megkeresi a könyvet ISBN alapján.
+        /// </summary>
+        /// <param name="isbn">A keresett könyv ISBN száma</param>
+        /// <returns>A megtalált könyv objektum, vagy null ha nem található</returns>
+        /// <exception cref="ArgumentException">Ha az ISBN üres vagy null</exception>
+        Task<Book?> GetBookByIsbnAsync(string isbn);
+
+        /// <summary>
+        /// Visszaadja az összes könyvet az adatbázisból.
+        /// </summary>
+        /// <returns>Az összes könyv listája</returns>
+        Task<IEnumerable<Book>> GetAllBooksAsync();
 
         /// <summary>
         /// Megkeresi a könyveket cím vagy szerző alapján.
@@ -70,6 +76,10 @@ namespace Library
         /// </summary>
         /// <returns>A nem elérhető könyvek listája</returns>
         Task<IEnumerable<Book>> GetUnavailableBooksAsync();
+
+        #endregion
+
+        #region Async Status Operations
 
         /// <summary>
         /// Ellenőrzi, hogy létezik-e könyv a megadott ISBN-nel.
@@ -92,6 +102,10 @@ namespace Library
         /// <returns>A példányok száma, vagy 0 ha a könyv nem található</returns>
         /// <exception cref="ArgumentException">Ha az ISBN üres vagy null</exception>
         Task<int> GetBookCopyCountAsync(string isbn);
+
+        #endregion
+
+        #region Synchronous Operations
 
         /// <summary>
         /// Szinkron verzió: Hozzáad egy új könyvet az adatbázishoz, vagy növeli a meglévő könyv példányszámát.
@@ -126,5 +140,7 @@ namespace Library
         /// <param name="searchTerm">A keresési kifejezés</param>
         /// <returns>A keresési feltételnek megfelelő könyvek listája</returns>
         IEnumerable<Book> SearchBooks(string searchTerm);
+
+        #endregion
     }
 }
