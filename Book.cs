@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.Diagnostics.CodeAnalysis;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Library
 {
@@ -8,6 +9,7 @@ namespace Library
         [Key]
         [Required]
         [MaxLength(20)]
+        [Column(TypeName = "nvarchar(13)")]
         public string Isbn { get; set; } = string.Empty;
 
         [Required]

@@ -25,7 +25,7 @@ namespace Library.Migrations
                 {
                     b.Property<string>("Isbn")
                         .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
+                        .HasColumnType("nvarchar(13)");
 
                     b.Property<string>("Author")
                         .IsRequired()

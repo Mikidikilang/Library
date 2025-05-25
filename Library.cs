@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.IO;
 
 namespace Library
 {
@@ -49,7 +50,8 @@ namespace Library
             }
             catch (Exception ex)
             {
-                return new OperationResult(false, $"Hiba történt a könyv hozzáadásakor: {ex.Message}");
+                LogError(ex);
+                return new OperationResult(false, "Hiba történt a könyv hozzáadásakor.");
             }
         }
 
@@ -87,7 +89,8 @@ namespace Library
             }
             catch (Exception ex)
             {
-                return new OperationResult(false, $"Hiba történt a kölcsönzés során: {ex.Message}");
+                LogError(ex);
+                return new OperationResult(false, "Hiba történt a kölcsönzés során.");
             }
         }
 
@@ -115,7 +118,8 @@ namespace Library
             }
             catch (Exception ex)
             {
-                return new OperationResult(false, $"Hiba történt a visszavétel során: {ex.Message}");
+                LogError(ex);
+                return new OperationResult(false, "Hiba történt a visszavétel során.");
             }
         }
 
@@ -168,6 +172,18 @@ namespace Library
         #region Segédfüggvények és IDisposable
 
         private Book? FindBookByIsbn(string isbn) => _bookRepository.GetBookByIsbn(isbn);
+
+        private void LogError(Exception ex)
+        {
+            try
+            {
+                File.AppendAllText("error.log", $"{DateTime.Now}: {ex}\n");
+            }
+            catch
+            {
+                // Ha a logolás is hibázik, ne csináljon semmit.
+            }
+        }
 
         public void Dispose()
         {
